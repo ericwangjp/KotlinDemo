@@ -29,8 +29,11 @@ fun testMethod() {
 //    testUnit(8, 9)
 //    indefiniteLengthParams("i", "am", "happy", "today")
 //    println(sumLambda(5,6))
-    dynamicVarbleParams("haha-->")
+//    dynamicVarbleParams("haha-->")
+//    println(nullHandle("ha"))
 }
+
+
 
 
 

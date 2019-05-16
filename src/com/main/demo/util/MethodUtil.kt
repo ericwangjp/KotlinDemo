@@ -31,8 +31,28 @@ fun indefiniteLengthParams(vararg params: String) {
 //lambda(匿名函数)
 val sumLambda: (Int, Int) -> Int = { x, y -> x + y }
 
-fun dynamicVarbleParams(text:String){
+/**
+ * $ 表示一个变量名或者变量值
+ * $varName 表示变量值
+ * ${varName.fun()} 表示变量的方法返回值
+ */
+fun dynamicVarbleParams(text: String) {
     println("the final result is $text")
-    println("another method is ${plus(5,1)}")
+    println("another method is ${plus(5, 1)}")
+}
+
+/**
+ *  Kotlin的空安全设计对于声明可为空的参数，在使用时要进行空判断处理，有两种处理方式，字段后加!!像Java一样抛出空异常，
+ *  另一种字段后加?可不做处理返回值为 null或配合?:做空判断处理
+ */
+//类型后面加?表示可为空
+fun nullHandle(txt: String?):Int {
+//抛出空指针异常
+    val ages = txt!!.toInt()
+//不做处理返回 null
+    val ages1 = txt?.toInt()
+//age为空返回-1
+    val ages2 = txt?.toInt() ?: -1
+    return ages
 }
 
