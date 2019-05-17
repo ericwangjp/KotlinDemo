@@ -10,13 +10,13 @@ fun main() {
     println("$tag end test project <--------------")
 }
 
-fun printManager(msg: String) {
+fun printManager(msg: String?) {
     println("------> start invoke method <--------")
     println("------> the result is $msg <--------")
     println("------> end invoke method <--------")
 }
 
-fun printManager(msg: Int) {
+fun printManager(msg: Int?) {
     println("------> start invoke method <--------")
     println("===> 执行结果: $msg <===")
     println("------> end invoke method <--------")
@@ -30,7 +30,30 @@ fun testMethod() {
 //    indefiniteLengthParams("i", "am", "happy", "today")
 //    println(sumLambda(5,6))
 //    dynamicVarbleParams("haha-->")
-//    println(nullHandle("ha"))
+//    println(nullHandle("12"))
+//    printManager(getStringLength(100))
+//    forLoopTest()
+//    println(1_0000_000)
+//    numberCompare()
+//    bitOperation(12)
+//    getArray()
+//    printChar()
+//    ifCondition()
+//    inScope()
+//    whenExpression()
+//    forIterator()
+//    doAndWhile()
+//    val child = Child("same", 18)
+//    child.childTest()
+//    child.test()
+//    val c = C()
+//    c.a()
+//    c.b()
+//    c.f()
+    val myTest = MyTest()
+    myTest.test1()
+    myTest.test2()
+    myTest.addMethod()
 }
 
 
