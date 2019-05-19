@@ -50,10 +50,25 @@ fun testMethod() {
 //    c.a()
 //    c.b()
 //    c.f()
-    val myTest = MyTest()
-    myTest.test1()
-    myTest.test2()
-    myTest.addMethod()
+//    val myTest = MyTest()
+//    myTest.test1()
+//    myTest.test2()
+//    myTest.addMethod()
+//    val testA = TestA()
+//    testA.setListener(object : AB {
+//        override fun setText(test: String) {
+//            println("接口回调--》$test")
+//        }
+//    })
+//    testA.hahaTest()
+
+//    val delegateClass = DelegateClass()
+//    delegateClass.name = "abd"
+//    delegateClass.name = "123"
+
+    val myUI = MyUI()
+    println(myUI.image)
+    println(myUI.text)
 }
 
 

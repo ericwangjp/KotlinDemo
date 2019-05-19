@@ -2,6 +2,11 @@ package com.main.demo.util
 
 import com.main.demo.main.printManager
 import jdk.nashorn.internal.runtime.Context
+import java.awt.Window
+import java.lang.Exception
+import kotlin.properties.Delegates
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 /**
  * kotlin 学习总结
@@ -585,11 +590,300 @@ sealed class Expr
 class Box<T>(t: T) {
     var value = t
 
-    fun <H> test(value:H){
+    fun <H> test(value: H) {
         println("泛型函数")
     }
 }
 
+/**
+ * Kotlin 中没有通配符类型，它有两个其他的东西：声明处型变（declaration-site variance）与类型投影（type projections）
+ * 声明处的类型变异使用协变注解修饰符：in、out，消费者 in, 生产者 out
+ * 使用 out 使得一个类型参数协变，协变类型参数只能用作输出，可以作为返回值类型但是无法作为入参的类型
+ * eg:
+ *      var strCo: Runoob<String> = Runoob("a")
+ *      var anyCo: Runoob<Any> = Runoob<Any>("b")
+ *       anyCo = strCo
+ *       println(anyCo.foo())   // 输出 a
+ */
+// 定义一个支持协变的类
+class Runoob<out A>(val a: A) {
+    fun foo(): A {
+        return a
+    }
+}
+
+/**
+ * in 使得一个类型参数逆变，逆变类型参数只能用作输入，可以作为入参的类型但是无法作为返回值的类型
+ * eg:
+ *      var strDCo = Runoob("a")
+ *      var anyDCo = Runoob<Any>("b")
+ *      strDCo = anyDCo
+ */
+// 定义一个支持逆变的类
+class RunoobU<in A>(a: A) {
+    fun foo(a: A) {
+    }
+}
+
+/**
+ * 星号投射:
+ *  Function<*, String> , 代表 Function<in Nothing, String> ;
+ *  Function<Int, *> , 代表 Function<Int, out Any?> ;
+ *  Function<, > , 代表 Function<in Nothing, out Any?> .
+ */
+
+/**
+ * 枚举常量用逗号分隔,每个枚举常量都是一个对象
+ * 每一个枚举都是枚举类的实例，它们可以被初始化
+ * 默认名称为枚举字符名，值从0开始。若需要指定值，则可以使用其构造函数
+ *
+ */
+enum class Color(val rgb: Int) {
+    RED(0xFF0000),
+    GREEN(0x00FF00),
+    BLUE(0x0000FF),
+}
+
+/**
+ * 枚举还支持以声明自己的匿名类及相应的方法、以及覆盖基类的方法
+ * 如果枚举类定义任何成员，要使用分号将成员定义中的枚举常量定义分隔开
+ */
+enum class ProtocolState {
+    WAITING {
+        override fun signal() = TALKING
+    },
+
+    TALKING {
+        override fun signal() = WAITING
+    };
+
+    abstract fun signal(): ProtocolState
+}
+
+/**
+ *  通过对象表达式实现一个匿名内部类的对象用于方法的参数中
+ *  对象可以继承于某个基类，或者实现其他接口
+ */
 
 
+interface AB {
+    fun setText(test: String)
+}
 
+open class TestA {
+    var ab: AB? = null
+    fun setListener(listener: AB) {
+        ab = listener
+    }
+
+    fun hahaTest() {
+        println("开始调用")
+        ab?.setText("回调接口")
+    }
+}
+
+/**
+ * 如果超类型有一个构造函数，则必须传递参数给它。多个超类型和接口可以用逗号分隔
+ * 通过对象表达式可以越过类的定义直接得到一个对象
+ * 匿名对象可以用作只在本地和私有作用域中声明的类型。如果你使用匿名对象作为公有函数的 返回类型或者
+ * 用作公有属性的类型，那么该函数或属性的实际类型 会是匿名对象声明的超类型，如果你没有声明任何超类型，就会
+ * 是 Any。在匿名对象 中添加的成员将无法访问
+ * 在对象表达中可以方便的访问到作用域中的其他变
+ */
+class CX {
+    val tesa: TestA = object : TestA(), AB {
+        override fun setText(test: String) {
+            println("override")
+        }
+    }
+
+    fun ab() {
+        val site = object {
+            var name: String = "菜鸟教程"
+            var url: String = "www.runoob.com"
+        }
+        println(site.name)
+        println(site.url)
+    }
+
+    // 私有函数，所以其返回类型是匿名对象类型
+    private fun foo() = object {
+        val x: String = "x"
+    }
+
+    // 公有函数，所以其返回类型是 Any
+    fun publicFoo() = object {
+        val x: String = "x"
+    }
+
+    fun bar() {
+        val x1 = foo().x        // 没问题
+//        val x2 = publicFoo().x  // 错误：未能解析的引用“x”
+    }
+}
+
+/**
+ *  Kotlin 使用 object 关键字来声明一个对象
+ *  Kotlin 中我们可以方便的通过对象声明来获得一个单例
+ *  引用该对象，我们直接使用其名称即可:
+ *      DataProviderManager.registerDataProvider(……)
+ *  当然你也可以定义一个变量来获取获取这个对象，当时当你定义两个不同的变量来获取这个对象时，你会发现你并不
+ *  能得到两个不同的变量。也就是说通过这种方式，我们获得一个单例
+ *  var data1 = DataProviderManager
+ *  var data2 = DataProviderManager
+ *  data1 == data2
+ *  对象可以有超类型 object DefaultListener : MouseAdapter()
+ *  与对象表达式不同，当对象声明在另一个类的内部时，这个对象并不能通过外部类的实例访问到该对象，
+ *  而只能通过类名来访问，同样该对象也不能直接访问到外部类的方法和变量
+ */
+object DataProviderManager {
+    fun registerDataProvider(provider: String) {
+        // ……
+    }
+
+    val allDataProviders: Collection<String>?
+        get() = null// ……
+}
+
+/**
+ * 类内部的对象声明可以用 companion 关键字标记，这样它就与外部类关联在一起，
+ * 我们就可以直接通过外部类访问到对象的内部元素
+ *
+ */
+class MyClassA {
+    companion object Factory {
+        fun create(): MyClassA = MyClassA()
+    }
+}
+
+val instance = MyClassA.create()   // 访问到对象的内部元素
+
+/**
+ * 可以省略掉该对象的对象名，然后使用 Companion 替代需要声明的对象名
+ * 一个类里面只能声明一个内部关联对象，即关键字 companion 只能使用一次
+ * 伴生对象的成员看起来像java的静态成员，但在运行时他们仍然是真实对象的实例成员
+ * 对象表达式和对象声明之间的语义差异:
+ *      对象表达式是在使用他们的地方立即执行的
+ *      对象声明是在第一次被访问到时延迟初始化的
+ *      伴生对象的初始化是在相应的类被加载（解析）时，与 Java 静态初始化器的语义相匹配
+ */
+class MyClassB {
+    companion object {
+        val txt = "123"
+    }
+}
+
+val x = MyClassB.Companion
+
+/**
+ * kotlin 委托:
+ *  委托模式是软件设计模式中的一项基本技巧。在委托模式中，有两个对象参与处理同一个请求，
+ *  接受请求的对象将请求委托给另一个对象来处理。
+ *  Kotlin 直接支持委托模式，Kotlin 通过关键字 by 实现委托
+ *  类的委托即一个类中定义的方法实际是调用另一个类的对象的方法来实现的
+ *  eg:
+ *   val b = BaseImpl(10)
+ *   Derived(b).print() // 输出 10
+ *  属性委托指的是一个类的某个属性值不是在类中直接进行定义，而是将其托付给一个代理类，从而实现对该类的属性统一管理
+ *  属性委托语法格式：
+ *      val/var <属性名>: <类型> by <表达式>
+ *  by 关键字之后的表达式就是委托, 属性的 get() 方法(以及set() 方法)将被委托给这个对象的 getValue() 和 setValue()方法
+ *  属性委托不必实现任何接口, 但必须提供 getValue() 函数(对于 var属性,还需要 setValue() 函数)
+ *
+ */
+// 创建接口
+interface IBase {
+    fun print()
+}
+
+// 实现此接口的被委托的类
+class BaseImpl(val x: Int) : IBase {
+    override fun print() {
+        print(x)
+    }
+}
+
+// 通过关键字 by 建立委托类
+class Derived(b: IBase) : IBase by b
+
+/**
+ * 延迟属性 Lazy:
+ * lazy() 是一个函数, 接受一个 Lambda 表达式作为参数, 返回一个 Lazy <T> 实例的函数，返回的实例可以作为实现延迟属性的委托
+ * 第一次调用 get() 会执行已传递给 lazy() 的 lamda 表达式并记录结果， 后续调用 get() 只是返回记录的结果
+ *  lazy 操作符是线程安全的
+ */
+val lazyValue: String by lazy {
+    println("computed!")     // 第一次调用输出，第二次调用不执行
+    "Hello"
+}
+
+/**
+ * observable 可以用于实现观察者模式
+ * Delegates.observable() 函数接受两个参数: 第一个是初始化值, 第二个是属性值变化事件的响应器(handler)
+ * 在属性赋值后会执行事件的响应器(handler)，它有三个参数：被赋值的属性、旧值和新值：
+ * notNull 适用于那些无法在初始化阶段就确定属性值的场合,如果属性在赋值前就被访问的话则会抛出异常
+ * 可以将局部变量声明为委托属性
+ * 属性委托要求：
+ *  对于只读属性(也就是说val属性), 它的委托必须提供一个名为getValue()的函数。该函数接受以下参数：
+ *  thisRef —— 必须与属性所有者类型（对于扩展属性——指被扩展的类型）相同或者是它的超类型
+ *  property —— 必须是类型 KProperty<*> 或其超类型
+ *  这个函数必须返回与属性相同的类型（或其子类型）
+ *  对于一个值可变(mutable)属性(也就是说,var 属性),除 getValue()函数之外,它的委托还必须 另外再提供一个名为setValue()的函数, 这个函数接受以下参数:
+ *  property —— 必须是类型 KProperty<*> 或其超类型
+ *  new value —— 必须和属性同类型或者是它的超类型
+ *
+ */
+class DelegateClass {
+    var name: String by Delegates.observable("init data") { kProperty: KProperty<*>, s: String, s1: String ->
+        println("旧值：$s,新值：$s1")
+    }
+}
+//------------------------------------------------------------------ 委托 ---------------------------------------------------------------------
+/**
+ * 通过定义 provideDelegate 操作符，可以扩展创建属性实现所委托对象的逻辑。
+ * 如果 by 右侧所使用的对象将 provideDelegate 定义为成员或扩展函数，那么会调用该函数来创建属性委托实例
+ * provideDelegate 的一个可能的使用场景是在创建属性时（而不仅在其 getter 或 setter 中）检查属性一致性。
+ * provideDelegate 的参数与 getValue 相同：
+ *  thisRef —— 必须与 属性所有者 类型（对于扩展属性——指被扩展的类型）相同或者是它的超类型
+ *  property —— 必须是类型 KProperty<*> 或其超类型。
+ *  重载操作符的函数需要用 operator关键字标记
+ *  在Kotlin中，可以对任何对象使用比较运算符(==、!=、 >、<)等,可以不用像Java那种调用equals,compareTo函数
+ *  使用==会转换成equals方法调用；但== 与 !=更安全，会自动检测是否为 null，如果不为null，才进行判断:
+ *      即：a == b ===> a?.equals(b) ?: (b==null)
+ */
+class ResourceLoader(private val id: ResourceId) {
+    operator fun provideDelegate(thisRef: MyUI, prop: KProperty<*>): ReadOnlyProperty<MyUI, String> {
+        return if (checkProperty(thisRef, prop.name)) {
+            DellImpl(id)
+        } else {
+            throw Exception("error ${prop.name}")
+        }
+    }
+
+    private fun checkProperty(thisRef: MyUI, name: String): Boolean {
+        return name == "image" || name == "text"
+    }
+}
+
+class DellImpl(private val id: ResourceId) : ReadOnlyProperty<MyUI, String> {
+    override fun getValue(thisRef: MyUI, property: KProperty<*>): String {
+        return if (property.name.equals("image"))
+            property.name + "_" + id.imageId
+        else
+            property.name + "_" + id.textId
+    }
+
+}
+
+class ResourceId {
+    val imageId: String = "100"
+    val textId: String = "101"
+}
+
+fun bindResource(id: ResourceId) = ResourceLoader(id)
+
+class MyUI {
+    val image by bindResource(ResourceId())
+    val text by bindResource(ResourceId())
+//    val age by bindResource(ResourceId())
+}
